@@ -90,6 +90,18 @@ export class DetailUserFollowController {
       }
     })
 
+    const array2 = listCharacterFollow.sort((a, b) => (a.followAt?.getTime() ?? 0) - (b.followAt?.getTime() ?? 0));
+
+    // Tạo một đối tượng ánh xạ từ tên đến vị trí trong mảng 2
+    const indexMap: {[key: string]: number} = {};
+    array2.forEach((item, index) => {
+      indexMap[item.characterId] = index;
+    });
+
+    // Sắp xếp mảng 1 bằng cách sử dụng đối tượng ánh xạ
+    listCharacter.sort((a, b) => indexMap[a.characterId ?? ""] - indexMap[b.characterId ?? ""]);
+
+
     return listCharacter;
   }
 
@@ -185,6 +197,19 @@ export class DetailUserFollowController {
     followParam: Omit<FollowParam, "followId">,
   ): Promise<boolean> {
 
+
+    ///check verify
+    let check: DetailUserFollow[] = await this.detailUserFollowRepository.find({
+      where: {
+        uid: followParam.uid,
+        characterId: followParam.characterId,
+      }
+    })
+
+    if (check.length == 0) {
+      return false;
+    }
+
     // decrese follow table character.
     let newCharacter: Character = await this.characterRepository.findById(followParam.characterId);
     newCharacter.followers = (newCharacter.followers ?? 0) - 1;
@@ -218,16 +243,28 @@ export class DetailUserFollowController {
     followParam: Omit<FollowParam, "followId">,
   ): Promise<boolean> {
 
-    /// increse follow table character.
-    let newCharacter: Character = await this.characterRepository.findById(followParam.characterId);
-    newCharacter.followers = (newCharacter.followers ?? 0) + 1;
-    this.characterRepository.updateById(followParam.characterId, newCharacter);
+    ///check verify
+    let check: DetailUserFollow[] = await this.detailUserFollowRepository.find({
+      where: {
+        uid: followParam.uid,
+        characterId: followParam.characterId,
+      }
+    })
+
+    if (check.length > 0) {
+      return false;
+    }
 
     // insert column into table user follow.
     let detailUserFollow: DetailUserFollow = new DetailUserFollow();
     detailUserFollow.characterId = followParam.characterId
     detailUserFollow.uid = followParam.uid
     this.detailUserFollowRepository.create(detailUserFollow);
+
+    /// increse follow table character.
+    let newCharacter: Character = await this.characterRepository.findById(followParam.characterId);
+    newCharacter.followers = (newCharacter.followers ?? 0) + 1;
+    this.characterRepository.updateById(followParam.characterId, newCharacter);
 
     return true;
   }

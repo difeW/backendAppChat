@@ -17,7 +17,7 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {Character, CharacterParam, DetailCharacterCategory, DetailUserFollow, FollowParam} from '../models';
+import {Character, CharacterParam, DetailCharacterCategory, DetailUserFollow} from '../models';
 import {CharacterRepository, DetailCharacterCategoryRepository, DetailUserFollowRepository} from '../repositories';
 
 export class CharacterController {
@@ -128,6 +128,38 @@ export class CharacterController {
     @param.filter(Character, {exclude: 'where'}) filter?: FilterExcludingWhere<Character>
   ): Promise<Character> {
     return this.characterRepository.findById(id, filter);
+  }
+
+  @get('/characters-for-user/{uid}')
+  @response(200, {
+    description: 'Array of Character model instance',
+
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(Character, {includeRelations: true}),
+        },
+      },
+    },
+  })
+  async findByUid(
+    @param.path.string('uid') uid: string,
+  ): Promise<Character[]> {
+    let listFlowwing: DetailUserFollow[] = await this.detailUserFollowRepository.find({where: {uid: uid}});
+    // let listConected: DetailUserFollow[] = await this.detailUserFollowRepository.find({where: {uid: uid}});
+    let resultList: Character[] = await this.characterRepository.find({where: {characterId: {nin: [...listFlowwing.map((e) => e.characterId)]}}});
+
+    function shuffleArray<T>(array: T[]): T[] {
+      const shuffledArray = [...array];
+      for (let i = shuffledArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+      }
+      return shuffledArray;
+    }
+
+    return shuffleArray(resultList);
   }
 
   @patch('/characters/{id}')

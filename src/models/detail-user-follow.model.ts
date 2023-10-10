@@ -21,6 +21,11 @@ export class DetailUserFollow extends Entity {
   })
   characterId: string;
 
+  @property({
+    type: 'date',
+    default: new Date(),
+  })
+  followAt: Date;
 
   constructor(data?: Partial<DetailUserFollow>) {
     super(data);

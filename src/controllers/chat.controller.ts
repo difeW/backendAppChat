@@ -19,6 +19,7 @@ import {
 } from '@loopback/rest';
 import {Chat} from '../models';
 import {ChatRepository} from '../repositories';
+import {DetailUserConectedController} from './detail-user-conected.controller';
 
 export class ChatController {
   constructor(

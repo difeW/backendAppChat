@@ -8,3 +8,4 @@ export * from './detail-user-follow.model';
 export * from './chat.model';
 export * from './character-param.model';
 export * from './follow-param.model';
+export * from './detail-user-conected.model';

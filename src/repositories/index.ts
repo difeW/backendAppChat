@@ -5,3 +5,4 @@ export * from './character.repository';
 export * from './chat.repository';
 export * from './detail-character-category.repository';
 export * from './detail-user-follow.repository';
+export * from './detail-user-conected.repository';

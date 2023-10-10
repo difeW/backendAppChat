@@ -6,3 +6,4 @@ export * from './character.controller';
 export * from './detail-character-category.controller';
 export * from './chat.controller';
 export * from './detail-user-follow.controller';
+export * from './detail-user-conected.controller';
